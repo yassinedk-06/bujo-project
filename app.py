@@ -33,7 +33,7 @@ PAPER_CSS = """
     color: #1e1e1e;
     font-family: 'Courier New', Courier, monospace;
 }
-h1, h2, h3, p, span, div, input {
+h1, h2, h3, p, span, div, input, li, th, td {
     font-family: 'Courier New', Courier, monospace !important;
     color: #1e1e1e !important;
 }
@@ -129,8 +129,56 @@ def persist_state() -> None:
     save_to_json(st.session_state.monthly_log, MONTHLY_FILE)
 
 
+def render_guide() -> None:
+    """Affiche la page des Clés et le guide complet du Bullet Journal."""
+    st.title("Clés & Guide // Méthode BuJo")
+    st.markdown(
+        "Bienvenue dans votre **Bullet Journal numérique**. Dans un carnet "
+        "traditionnel, la première page s'appelle la **Page des Clés (Key)** : "
+        "elle répertorie les symboles et les règles du *Rapid Logging*."
+    )
+    st.divider()
+
+    st.subheader("1. La Saisie Rapide (Rapid Logging)")
+    st.markdown(
+        "Plus besoin de menus déroulants : tapez votre entrée en **une seule "
+        "ligne** en commençant par une puce, puis appuyez sur **Entrée**."
+    )
+    st.markdown(
+        "| Type | Raccourci | Symbole | Exemple de frappe |\n"
+        "| :--- | :--- | :--- | :--- |\n"
+        "| **Tâche** | `.` ou `•` *(ou rien)* | `•` | `. Acheter du café` |\n"
+        "| **Événement** | `o` ou `○` | `○` | `o Réunion client à 14h` |\n"
+        "| **Note** | `-` ou `–` | `–` | `- Serveur lancé sur le port 80` |"
+    )
+
+    st.subheader("2. Les Signifiants & Descriptions")
+    st.markdown(
+        "Ajoutez du contexte en plaçant un signifiant **tout au début** de "
+        "votre ligne, ou utilisez `//` pour glisser une note détaillée :\n"
+        "- `*` **(Priorité)** : Indique une tâche importante ou urgente.\n"
+        "- `!` **(Inspiration)** : Met en avant une idée clé.\n"
+        "- `//` **(Détail)** : Sépare le titre de sa description.\n\n"
+        "**Exemples prêts à copier-coller :**\n"
+        "- `* . Corriger le bug // dans storage.py avant 18h`\n"
+        "- `! - Penser à documenter le projet avec Sphinx`"
+    )
+
+    st.subheader("3. Le Cycle de Vie & la Migration")
+    st.markdown(
+        "Dans un Bullet Journal, **on n'efface jamais rien** (pas de corbeille). "
+        "Les tâches évoluent grâce aux boutons situés à droite de la ligne :\n"
+        "- **`×` (Terminer)** : La tâche est accomplie (`DONE`).\n"
+        "- **`~` (Abandonner)** : La tâche n'est plus pertinente (`CANCELLED`). "
+        "Elle reste barrée pour conserver la trace de votre réflexion.\n"
+        "- **`>` (Migrer)** : Reporte une tâche non finie du **Daily Log** "
+        "vers le **Monthly Log**. L'originale prend le symbole `>` et une "
+        "nouvelle tâche `•` apparaît dans votre mois."
+    )
+
+
 def render_rapid_bar(log: DailyLog | MonthlyLog) -> None:
-    """Affiche la barre de saisie en une ligne (Rapid Logging)."""
+    """Affiche la barre de saisie en une ligne et l'aide-mémoire."""
     with st.form("rapid_logging_form", clear_on_submit=True):
         col_in, col_btn = st.columns([6, 1])
         with col_in:
@@ -158,6 +206,17 @@ def render_rapid_bar(log: DailyLog | MonthlyLog) -> None:
                 st.rerun()
             except BujoError as err:
                 st.error(str(err))
+
+    with st.expander("📖 Aide rapide : Syntaxe & Symboles"):
+        st.markdown(
+            "- **Types :** `.` Tâche (`•`) | `o` Événement (`○`) | "
+            "`-` Note (`–`)\n"
+            "- **Options :** `*` au début = Priorité | `!` au début = Idée | "
+            "`//` = Ajouter une description\n"
+            "- **Actions :** `×` Terminer | `~` Abandonner | "
+            "`>` Migrer vers le mois\n"
+            "- *Exemple :* `* . Réviser la soutenance // slides et démo`"
+        )
 
 
 def render_stream(log: DailyLog | MonthlyLog, is_daily: bool) -> None:
@@ -224,17 +283,13 @@ def main() -> None:
 
     st.sidebar.title("📓 Index")
     view = st.sidebar.radio(
-        "Page ouverte", ["Daily Log", "Monthly Log"]
+        "Page ouverte",
+        ["Daily Log", "Monthly Log", "Clés & Guide (Key)"],
     )
-    st.sidebar.divider()
-    st.sidebar.markdown(
-        "**Légende (Saisie rapide)**\n"
-        "- `.` ou `•` : Tâche *(défaut)*\n"
-        "- `o` ou `○` : Événement\n"
-        "- `-` ou `–` : Note\n"
-        "- `*` : Priorité | `!` : Idée\n"
-        "- `//` : Ajouter un détail"
-    )
+
+    if view == "Clés & Guide (Key)":
+        render_guide()
+        return
 
     is_daily = view == "Daily Log"
     current_log = (
