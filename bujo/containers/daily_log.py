@@ -1,5 +1,7 @@
 """Gestion du Daily Log (journal du jour)."""
 
+from __future__ import annotations
+
 from datetime import date
 from bujo.core.entry import Entry, Task, TaskStatus
 from bujo.exceptions import EntryNotFoundError

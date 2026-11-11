@@ -1,5 +1,7 @@
 """Modèles de base pour les entrées du Bullet Journal."""
 
+from __future__ import annotations
+
 import uuid
 from abc import ABC, abstractmethod
 from datetime import date, datetime
