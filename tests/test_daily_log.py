@@ -43,3 +43,18 @@ def test_get_active_tasks() -> None:
     active = daily.get_active_tasks()
     assert len(active) == 1
     assert active[0].id == t2.id
+
+
+def test_daily_log_str_and_invalid_complete() -> None:
+    """Vérifie le __str__ du DailyLog et l'erreur sur complete d'un événement."""
+    daily = DailyLog()
+    daily.add_task("Tâche du jour")
+    output = str(daily)
+    assert "=== Daily Log :" in output
+    assert "Tâche du jour" in output
+
+    from bujo.core.entry import Event
+    event = Event("Point synchro")
+    daily.add_entry(event)
+    with pytest.raises(EntryNotFoundError):
+        daily.complete_task(event.id)
