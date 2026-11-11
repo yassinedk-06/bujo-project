@@ -8,3 +8,11 @@
 2026-11-11 20:37:47,629 - bujo_test - ERROR - Message de test erreur
 2026-11-11 20:38:47,323 - bujo_test - DEBUG - Message de test debug
 2026-11-11 20:38:47,323 - bujo_test - ERROR - Message de test erreur
+2026-11-11 20:51:47,672 - bujo_test - DEBUG - Message de test debug
+2026-11-11 20:51:47,673 - bujo_test - ERROR - Message de test erreur
+2026-11-11 20:51:47,682 - bujo - INFO - Journal sauvegardé dans /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_save_and_load_daily_log0/daily.json
+2026-11-11 20:51:47,682 - bujo - INFO - DailyLog chargé depuis /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_save_and_load_daily_log0/daily.json
+2026-11-11 20:51:47,683 - bujo - INFO - Journal sauvegardé dans /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_save_and_load_monthly_log0/monthly.json
+2026-11-11 20:51:47,683 - bujo - INFO - MonthlyLog chargé depuis /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_save_and_load_monthly_log0/monthly.json
+2026-11-11 20:51:47,685 - bujo - INFO - Export Markdown généré dans /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_export_to_markdown0/daily.md
+2026-11-11 20:51:47,685 - bujo - INFO - Export Markdown généré dans /private/var/folders/j7/mgszh1y13ggcvfrfvp3nn4c80000gn/T/pytest-of-rif/pytest-0/test_export_to_markdown0/monthly.md

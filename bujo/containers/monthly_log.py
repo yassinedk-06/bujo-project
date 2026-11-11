@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
+
 from bujo.containers.daily_log import DailyLog
 from bujo.core.entry import Entry, Task, TaskStatus
 from bujo.exceptions import EntryNotFoundError, InvalidStateTransitionError
@@ -39,11 +41,7 @@ class MonthlyLog:
         return self.entries[entry_id]
 
     def migrate_task_from_daily(self, daily_log: DailyLog, task_id: str) -> Task:
-        """Migre une tâche depuis un Daily Log vers ce Monthly Log.
-
-        La tâche source passe à l'état MIGRATED ('>').
-        Une nouvelle tâche identique à l'état TODO est ajoutée au Monthly Log.
-        """
+        """Migre une tâche depuis un Daily Log vers ce Monthly Log."""
         source_entry = daily_log.get_entry(task_id)
         if not isinstance(source_entry, Task):
             raise EntryNotFoundError(f"L'entrée {task_id} n'est pas une tâche.")
@@ -52,10 +50,8 @@ class MonthlyLog:
             msg = "Seule une tâche TODO peut être migrée."
             raise InvalidStateTransitionError(msg)
 
-        # 1. Marquer la tâche source comme migrée (symbole '>')
         source_entry.mark_migrated()
 
-        # 2. Créer la nouvelle tâche dans le Monthly Log
         new_task = Task(
             title=source_entry.title,
             description=source_entry.description,
@@ -64,6 +60,24 @@ class MonthlyLog:
         )
         self.add_entry(new_task)
         return new_task
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convertit le MonthlyLog en dictionnaire sérialisable."""
+        return {
+            "type": "MonthlyLog",
+            "year": self.year,
+            "month": self.month,
+            "entries": [entry.to_dict() for entry in self.entries.values()],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> MonthlyLog:
+        """Reconstruit un MonthlyLog depuis un dictionnaire."""
+        log = cls(year=data["year"], month=data["month"])
+        for entry_data in data.get("entries", []):
+            entry = Entry.from_dict(entry_data)
+            log.entries[entry.id] = entry
+        return log
 
     def __str__(self) -> str:
         """Représentation textuelle formatée en Rapid Logging."""

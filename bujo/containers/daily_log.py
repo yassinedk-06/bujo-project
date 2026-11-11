@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
+
 from bujo.core.entry import Entry, Task, TaskStatus
 from bujo.exceptions import EntryNotFoundError
 
@@ -54,6 +56,23 @@ class DailyLog:
             for entry in self.entries.values()
             if isinstance(entry, Task) and entry.status == TaskStatus.TODO
         ]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convertit le DailyLog en dictionnaire sérialisable."""
+        return {
+            "type": "DailyLog",
+            "log_date": self.log_date.isoformat(),
+            "entries": [entry.to_dict() for entry in self.entries.values()],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> DailyLog:
+        """Reconstruit un DailyLog depuis un dictionnaire."""
+        log = cls(log_date=date.fromisoformat(data["log_date"]))
+        for entry_data in data.get("entries", []):
+            entry = Entry.from_dict(entry_data)
+            log.entries[entry.id] = entry
+        return log
 
     def __str__(self) -> str:
         """Représentation textuelle du Daily Log."""

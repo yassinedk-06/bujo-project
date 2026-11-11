@@ -6,6 +6,7 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 from enum import Enum
+from typing import Any
 
 from bujo.exceptions import EmptyTitleError, InvalidStateTransitionError
 
@@ -53,6 +54,60 @@ class Entry(ABC):
     def get_symbol(self) -> str:
         """Retourne le symbole d'affichage de l'entrée."""
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convertit l'entrée en dictionnaire sérialisable en JSON."""
+        return {
+            "type": self.__class__.__name__,
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "created_at": self.created_at.isoformat(),
+            "log_date": self.log_date.isoformat(),
+            "signifier": self.signifier.value,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Entry:
+        """Reconstruit une entrée depuis un dictionnaire."""
+        entry_type = data.get("type")
+        signifier = Signifier(data.get("signifier", ""))
+        log_date = date.fromisoformat(data["log_date"])
+
+        if entry_type == "Task":
+            entry: Entry = Task(
+                title=data["title"],
+                description=data.get("description", ""),
+                log_date=log_date,
+                signifier=signifier,
+            )
+            entry.status = TaskStatus(data["status"])
+        elif entry_type == "Event":
+            ev_time = (
+                datetime.fromisoformat(data["event_time"])
+                if data.get("event_time")
+                else None
+            )
+            entry = Event(
+                title=data["title"],
+                event_time=ev_time,
+                description=data.get("description", ""),
+                log_date=log_date,
+                signifier=signifier,
+            )
+        elif entry_type == "Note":
+            entry = Note(
+                title=data["title"],
+                description=data.get("description", ""),
+                log_date=log_date,
+                signifier=signifier,
+            )
+        else:
+            raise ValueError(f"Type d'entrée inconnu : {entry_type}")
+
+        entry.id = data["id"]
+        entry.created_at = datetime.fromisoformat(data["created_at"])
+        return entry
+
     def __str__(self) -> str:
         """Représentation textuelle de l'entrée pour l'affichage console."""
         prefix = f"{self.signifier.value} " if self.signifier.value else ""
@@ -98,7 +153,8 @@ class Task(Entry):
     def mark_migrated(self) -> None:
         """Marque la tâche comme migrée."""
         if self.status != TaskStatus.TODO:
-            raise InvalidStateTransitionError("Seule une tâche TODO peut être migrée.")
+            msg = "Seule une tâche TODO peut être migrée."
+            raise InvalidStateTransitionError(msg)
         self.status = TaskStatus.MIGRATED
 
     def mark_scheduled(self) -> None:
@@ -107,6 +163,12 @@ class Task(Entry):
             msg = "Seule une tâche TODO peut être planifiée."
             raise InvalidStateTransitionError(msg)
         self.status = TaskStatus.SCHEDULED
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convertit la tâche en dictionnaire incluant son statut."""
+        data = super().to_dict()
+        data["status"] = self.status.value
+        return data
 
 
 class Event(Entry):
@@ -127,6 +189,14 @@ class Event(Entry):
     def get_symbol(self) -> str:
         """Symbole immuable d'un événement."""
         return "○"
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convertit l'événement en dictionnaire incluant son horaire."""
+        data = super().to_dict()
+        data["event_time"] = (
+            self.event_time.isoformat() if self.event_time else None
+        )
+        return data
 
 
 class Note(Entry):
