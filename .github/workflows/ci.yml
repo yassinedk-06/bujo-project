@@ -1,10 +1,15 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   quality-and-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,7 +25,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check PEP 8 and Docstrings
-        run: flake8 bujo tests --max-line-length=88 --extend-ignore=D203,D213,D401
+        run: |
+          flake8 app.py bujo tests --max-line-length=88 --extend-ignore=D203,D213,D401
 
       - name: Run unit tests with coverage
-        run: pytest --cov=bujo tests/
+        run: |
+          pytest --cov=bujo --cov-fail-under=90 tests/
+
+      - name: Build Sphinx documentation (strict mode)
+        run: |
+          sphinx-build -W -b html docs docs/_build/html
